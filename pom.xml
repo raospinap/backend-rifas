@@ -121,6 +121,8 @@
 
   <!-- 🔨 Compilación y ejecución -->
   <build>
+  	<finalName>rifa-interactiva</finalName>
+  	
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
