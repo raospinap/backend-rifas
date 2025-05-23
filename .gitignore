@@ -1,19 +1,23 @@
 # Archivos sensibles
-/src/main/resources/application.properties
+**/application-local.properties
+.env
 
 # Archivos generados por Maven
 /target/
 
-# Archivos específicos de IDEs (si usas Eclipse o IntelliJ)
+# Archivos específicos de IDEs
 *.iml
 .idea/
 .classpath
 .project
 .settings/
 
-# Archivos de Docker locales
+# Archivos de Docker
 /docker-data/
 
 # Logs y temporales
 *.log
 *.tmp
+*.swp
+*.bak
+*.orig
