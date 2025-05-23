@@ -13,7 +13,7 @@ public class SorteoScheduler {
         this.rifaService = rifaService;
     }
 
-    @Scheduled(fixedRate = 30000) // cada 30 seg
+    @Scheduled(fixedRate = 60000) // cada 30 seg
     public void ejecutarSorteoAutomatico() {
         System.out.println("⏰ Verificando rifas expiradas...");
         rifaService.sortearRifasVencidas();
