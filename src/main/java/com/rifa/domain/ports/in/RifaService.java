@@ -20,8 +20,4 @@ public interface RifaService {
 
     List<Rifa> listarRifasDisponiblesParaUsuario(Long idUsuario);
 
-
-
-
-
 }

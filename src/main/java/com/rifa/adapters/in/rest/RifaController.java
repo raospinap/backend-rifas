@@ -3,8 +3,13 @@ package com.rifa.adapters.in.rest;
 import com.rifa.domain.model.Rifa;
 import com.rifa.domain.ports.in.RifaService;
 import com.rifa.adapters.in.rest.dto.CrearRifaDTO;
+import com.rifa.adapters.in.rest.dto.RifaConParticipantesDTO;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import com.rifa.domain.ports.out.ParticipacionRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +22,11 @@ public class RifaController {
 
     private final RifaService rifaService;
 
+
+    @Autowired
+    private ParticipacionRepository participacionRepository;
+
+    
     public RifaController(RifaService rifaService) {
         this.rifaService = rifaService;
     }
@@ -85,9 +95,18 @@ public class RifaController {
         return ResponseEntity.ok(activas);
     }
 
-    // Todos pueden ver rifas por estado
+
+
     @GetMapping
-    public List<Rifa> listarPorEstado(@RequestParam("estado") Rifa.EstadoRifa estado) {
-        return rifaService.listarPorEstado(estado);
+    public List<RifaConParticipantesDTO> listarPorEstado(@RequestParam("estado") Rifa.EstadoRifa estado) {
+        List<Rifa> rifas = rifaService.listarPorEstado(estado);
+        return rifas.stream()
+        		.map(rifa -> new RifaConParticipantesDTO(
+        			    rifa,
+        			    participacionRepository.contarPorRifa(rifa.getId()) // ✅ aquí
+        			))
+
+            .toList();
     }
+
 }
