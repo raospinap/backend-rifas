@@ -28,4 +28,9 @@ public class RabbitMQConfig {
         return template;
     }
     
+    @Bean
+    public Queue eventosRifaQueue() {
+        return new Queue("eventos.rifa", true); // true = durable
+    }
+    
 }

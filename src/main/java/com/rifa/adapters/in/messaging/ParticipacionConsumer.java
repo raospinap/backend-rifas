@@ -1,7 +1,7 @@
 package com.rifa.adapters.in.messaging;
 
 import com.rifa.adapters.out.messaging.dto.ParticipacionMessage;
-import com.rifa.application.ParticipacionService;
+import com.rifa.application.ParticipacionServiceImpl;
 import com.rifa.config.RabbitMQConfig;
 import com.rifa.domain.exceptions.ParticipacionDuplicadaException;
 
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParticipacionConsumer {
 
-    private final ParticipacionService participacionService;
+    private final ParticipacionServiceImpl participacionService;
 
-    public ParticipacionConsumer(ParticipacionService participacionService) {
+    public ParticipacionConsumer(ParticipacionServiceImpl participacionService) {
         this.participacionService = participacionService;
     }
 

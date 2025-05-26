@@ -1,24 +1,35 @@
 package com.rifa.application;
 
+import com.rifa.adapters.out.messaging.EventoProducer;
+import com.rifa.adapters.out.messaging.dto.EventoMessage;
 import com.rifa.adapters.out.persistence.ParticipacionJpaRepository;
 import com.rifa.domain.exceptions.ParticipacionDuplicadaException;
 import com.rifa.adapters.out.persistence.RifaJpaRepository;
 import com.rifa.domain.model.Participacion;
 import com.rifa.domain.model.Rifa;
+import com.rifa.domain.ports.in.ParticipacionService;
 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
-public class ParticipacionService {
+public class ParticipacionServiceImpl implements ParticipacionService{
 
-    private final ParticipacionJpaRepository participacionRepo;
-    private final RifaJpaRepository rifaRepo; 
-    public ParticipacionService(ParticipacionJpaRepository participacionRepo, RifaJpaRepository rifaRepo) {
-        this.participacionRepo = participacionRepo;
-        this.rifaRepo = rifaRepo;
-    }
+	private final ParticipacionJpaRepository participacionRepo;
+	private final RifaJpaRepository rifaRepo;
+	private final EventoProducer eventoProducer;
+
+	public ParticipacionServiceImpl(
+	    ParticipacionJpaRepository participacionRepo,
+	    RifaJpaRepository rifaRepo,
+	    EventoProducer eventoProducer
+	) {
+	    this.participacionRepo = participacionRepo;
+	    this.rifaRepo = rifaRepo;
+	    this.eventoProducer = eventoProducer;
+	}
+
 
     public void registrarParticipacion(Long idUsuario, Long idRifa, LocalDateTime fechaHora) {
 
@@ -39,6 +50,13 @@ public class ParticipacionService {
         participacion.setFechaHora(fechaHora);
 
         participacionRepo.save(participacion);
+        
+        eventoProducer.enviarEvento(new EventoMessage(
+        	    "PARTICIPACION",
+        	    "👤 Usuario " + idUsuario + " participó en rifa ID " + idRifa,
+        	    fechaHora
+        	));
+
     }
 
     
