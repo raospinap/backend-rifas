@@ -28,7 +28,8 @@ public class SecurityConfig {
 	        .authorizeHttpRequests(auth -> auth
 	            .requestMatchers(
 	                "/auth/**",
-	                "/verificacion/**"
+	                "/verificacion/**",
+	                "/ping"
 	            ).permitAll()
 	            .anyRequest().authenticated()
 	        )
