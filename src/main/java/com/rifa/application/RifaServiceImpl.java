@@ -1,6 +1,8 @@
 package com.rifa.application;
 
 import com.rifa.adapters.out.external.OpenAIService;
+import com.rifa.adapters.out.messaging.EventoProducer;
+import com.rifa.adapters.out.messaging.dto.EventoMessage;
 import com.rifa.adapters.out.persistence.ParticipacionJpaRepository;
 import com.rifa.adapters.out.persistence.PremioJpaRepository;
 import com.rifa.adapters.out.persistence.RifaJpaRepository;
@@ -12,6 +14,7 @@ import com.rifa.domain.model.Rifa.EstadoRifa;
 import com.rifa.domain.ports.in.RifaService;
 import com.rifa.domain.ports.out.RifaRepository;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,24 +29,24 @@ public class RifaServiceImpl implements RifaService {
     private final ParticipacionJpaRepository participacionJpaRepository;
     private final PremioJpaRepository premioJpaRepository;
     private final RifaJpaRepository rifaJpaRepository;
-
-
+    private final EventoProducer eventoProducer;
+    
     public RifaServiceImpl(
     	    RifaRepository rifaRepository,
     	    OpenAIService openAIService,
     	    ParticipacionJpaRepository participacionJpaRepository,
     	    PremioJpaRepository premioJpaRepository,
-    	    RifaJpaRepository rifaJpaRepository
+    	    RifaJpaRepository rifaJpaRepository,
+    	    EventoProducer eventoProducer
     	) {
     	    this.rifaRepository = rifaRepository;
     	    this.openAIService = openAIService;
     	    this.participacionJpaRepository = participacionJpaRepository;
     	    this.premioJpaRepository = premioJpaRepository;
     	    this.rifaJpaRepository = rifaJpaRepository;
+    	    this.eventoProducer = eventoProducer;
     	}
 
-    
-    
     @Override
     public Rifa crearRifa(String tema, Integer duracionMinutos, Integer numGanadores) {
         LocalDateTime inicio = LocalDateTime.now();
@@ -68,6 +71,12 @@ public class RifaServiceImpl implements RifaService {
         
         // Asignar la lista de premios a la rifa
         nueva.setPremios(premiosGenerados);
+        
+        eventoProducer.enviarEvento(new EventoMessage(
+        	    "RIFA_CREADA",
+        	    "🎯 Rifa \"" + tema + "\" Creada.",
+        	    LocalDateTime.now()
+        	));
         
         return rifaRepository.guardar(nueva);
     }
@@ -125,6 +134,12 @@ public class RifaServiceImpl implements RifaService {
             sortearRifa(rifa);
         } else {
             rifa.setEstado(EstadoRifa.FINALIZADA);
+            eventoProducer.enviarEvento(new EventoMessage(
+                "RIFA_CERRADA",
+                "🔴 Rifa \"" + rifa.getTema() + "\" Cancelada.",
+                LocalDateTime.now()
+            ));
+            
         }
 
         return rifaRepository.guardar(rifa);
@@ -145,7 +160,7 @@ public class RifaServiceImpl implements RifaService {
 
         if (participaciones.size() < rifa.getNumGanadores()) {
             System.out.println("⚠️ No hay suficientes participantes para la rifa " + rifa.getId());
-            return;
+            return ;
         }
 
         Collections.shuffle(participaciones);
@@ -163,6 +178,13 @@ public class RifaServiceImpl implements RifaService {
         }
 
         rifa.setEstado(EstadoRifa.SORTEADA);
+        eventoProducer.enviarEvento(new EventoMessage(
+        	    "SORTEO",
+        	    "🎯 Rifa \"" + rifa.getTema() + "\" Sorteada.",
+        	    LocalDateTime.now()
+        	));
+        
+        return;
     }    
        
 }

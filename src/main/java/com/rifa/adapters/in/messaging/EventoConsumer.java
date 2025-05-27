@@ -1,6 +1,7 @@
 package com.rifa.adapters.in.messaging;
 
 import com.rifa.adapters.out.messaging.dto.EventoMessage;
+import com.rifa.config.RabbitMQConfig;
 import com.rifa.domain.model.Evento;
 import com.rifa.domain.ports.out.EventoRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,7 +16,8 @@ public class EventoConsumer {
         this.eventoRepository = eventoRepository;
     }
 
-    @RabbitListener(queues = "eventos.rifa")
+    @RabbitListener(queues = RabbitMQConfig.EVENTOS_QUEUE)
+
     public void recibirEvento(EventoMessage mensaje) {
         Evento evento = new Evento();
         evento.setTipo(mensaje.getTipo());

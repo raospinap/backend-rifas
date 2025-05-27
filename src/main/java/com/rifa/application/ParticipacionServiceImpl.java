@@ -5,8 +5,10 @@ import com.rifa.adapters.out.messaging.dto.EventoMessage;
 import com.rifa.adapters.out.persistence.ParticipacionJpaRepository;
 import com.rifa.domain.exceptions.ParticipacionDuplicadaException;
 import com.rifa.adapters.out.persistence.RifaJpaRepository;
+import com.rifa.adapters.out.persistence.UsuarioJpaRepository;
 import com.rifa.domain.model.Participacion;
 import com.rifa.domain.model.Rifa;
+import com.rifa.domain.model.Usuario;
 import com.rifa.domain.ports.in.ParticipacionService;
 
 import org.springframework.stereotype.Service;
@@ -19,15 +21,18 @@ public class ParticipacionServiceImpl implements ParticipacionService{
 	private final ParticipacionJpaRepository participacionRepo;
 	private final RifaJpaRepository rifaRepo;
 	private final EventoProducer eventoProducer;
-
+	private final UsuarioJpaRepository usuarioRepo;
+	
 	public ParticipacionServiceImpl(
 	    ParticipacionJpaRepository participacionRepo,
 	    RifaJpaRepository rifaRepo,
-	    EventoProducer eventoProducer
+	    EventoProducer eventoProducer,
+	    UsuarioJpaRepository usuarioRepo
 	) {
 	    this.participacionRepo = participacionRepo;
 	    this.rifaRepo = rifaRepo;
 	    this.eventoProducer = eventoProducer;
+	    this.usuarioRepo = usuarioRepo;
 	}
 
 
@@ -51,11 +56,19 @@ public class ParticipacionServiceImpl implements ParticipacionService{
 
         participacionRepo.save(participacion);
         
-        eventoProducer.enviarEvento(new EventoMessage(
-        	    "PARTICIPACION",
-        	    "👤 Usuario " + idUsuario + " participó en rifa ID " + idRifa,
-        	    fechaHora
+        Usuario usuario = usuarioRepo.findById(idUsuario)
+        	    .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+
+        	String correo = usuario.getCorreo();
+        	String tema = rifa.getTema();
+
+        
+        	eventoProducer.enviarEvento(new EventoMessage(
+        		    "PARTICIPACION",
+        		    "👤 " + correo + " participó en la rifa \"" + tema + "\"",
+        		    fechaHora
         	));
+
 
     }
 
